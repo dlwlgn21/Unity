@@ -10,7 +10,7 @@ public abstract class MovingObject : MonoBehaviour
     private BoxCollider2D mBoxColider2D;
     private Rigidbody2D mRb2D;
     private float mInverseMoveTime;
-
+    private bool mIsMoving;
 
 
     // Start is called before the first frame update
@@ -29,7 +29,7 @@ public abstract class MovingObject : MonoBehaviour
         hit = Physics2D.Linecast(start, end, blockingLayer);
         mBoxColider2D.enabled = true;
 
-        if (hit.transform == null)
+        if (hit.transform == null && !mIsMoving)
         {
             StartCoroutine(SmoothMovement(end));
             return true;
@@ -66,15 +66,23 @@ public abstract class MovingObject : MonoBehaviour
 
     protected IEnumerator SmoothMovement(Vector3 end)
     {
+        mIsMoving = true;
         float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
 
         while (sqrRemainingDistance > float.Epsilon)
         {
-            Vector3 newPosition = Vector3.MoveTowards(mRb2D.position, end, 25.0f * Time.deltaTime);
+            Vector3 newPosition = Vector3.MoveTowards(mRb2D.position, end, 45.0f * Time.deltaTime);
             mRb2D.MovePosition(newPosition);
             sqrRemainingDistance = (transform.position - end).sqrMagnitude;
             yield return null;  // 루프를 갱신하기 전에 다음 프레임을 기다림.
         }
+
+        //Make sure the object is exactly at the end of its movement.
+        mRb2D.MovePosition(end);
+
+        //The object is no longer moving.
+        mIsMoving = false;
+
     }
 
     protected abstract void OnCanNotMove<T>(T component)

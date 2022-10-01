@@ -10,7 +10,11 @@ public class Enemy : MovingObject
     private Animator mAnimator;
     private Transform mTarget;              // Enemy가 어디로 향할지 알려주는 변수
     private bool mIsSkipMove;               // Enemy가 턴마다 움직이게 하는데 사용할 것임.
-   
+
+    // AudioSection
+    public AudioClip chopSound1;
+    public AudioClip chopSound2;
+
     protected override void Start()
     {
         GameManager.instance.AddEnemyToList(this);
@@ -28,7 +32,6 @@ public class Enemy : MovingObject
         if (Mathf.Abs(mTarget.position.x - transform.position.x) < float.Epsilon)
         {
             yDir = mTarget.position.y > transform.position.y ? 1 : -1;
-            
         }
         else
         {
@@ -56,6 +59,7 @@ public class Enemy : MovingObject
         Player hitPlayer = component as Player;
         Debug.Assert(hitPlayer != null);
         mAnimator.SetTrigger("EnemyChop");
+        SoundManager.instance.PlayRandomSfx(chopSound1, chopSound2);
         hitPlayer.LoseFoodPoint(playerDamagePoint);
     }
 

@@ -9,6 +9,11 @@ public class InnerWall : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
 
+    // AudioSection
+    public AudioClip AttackedSound1;
+    public AudioClip AttackedSound2;
+
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -19,6 +24,7 @@ public class InnerWall : MonoBehaviour
     {
         spriteRenderer.sprite = damagedSprite;
         hp -= loss;
+        SoundManager.instance.PlayRandomSfx(AttackedSound1, AttackedSound2);
         if (hp <= 0)
         {
             gameObject.SetActive(false);
