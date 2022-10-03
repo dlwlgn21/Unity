@@ -5,14 +5,14 @@ using UnityEngine;
 public class Parallax : MonoBehaviour
 {
     public Transform[] backgrounds;
-    public float smoothParallaxingAmount;       // How smooth parallaxing is going to be. Make sure to set this avobe Zero.
+    public float smoothParallaxingAmount;           // How smooth parallaxing is going to be. Make sure to set this avobe Zero.
 
 
 
     private Transform mCamera;
     private Vector3 mPreviosFrameCameraPostion;
-    private float[] mParallaxScales;             // The proportion of the Camera's movement to the move backgrounds by.
-                                                // 카메라 움직임의 비율에 따라서 배경을 이동시키는 스케일을 저장하는 변수 
+    private float[] mParallaxScales;                // The proportion of the Camera's movement to the move backgrounds by.
+                                                    // 카메라 움직임의 비율에 따라서 배경을 이동시키는 스케일을 저장하는 변수 
 
     void Awake()
     {
