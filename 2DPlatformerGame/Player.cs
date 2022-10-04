@@ -9,7 +9,6 @@ public class Player : MonoBehaviour
     {
         public int health;
     }
-    public int initialHealth;
     public PlayerStats playerStats = new PlayerStats();
 
     private float deathLimitHeight = -20;

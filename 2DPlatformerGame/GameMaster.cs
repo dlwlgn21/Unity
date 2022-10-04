@@ -6,7 +6,7 @@ public class GameMaster : MonoBehaviour
 {
     public static GameMaster gm;
 
-    private void Start()
+    private void Awake()
     {
         if (gm == null)
         {
@@ -31,5 +31,10 @@ public class GameMaster : MonoBehaviour
     {
         Destroy(player.gameObject);
         StartCoroutine(gm.RespawnPlayer());
+    }
+
+    public void KillEnemy(Enemy enemy)
+    {
+        Destroy(enemy.gameObject);
     }
 }

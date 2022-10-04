@@ -7,20 +7,33 @@ using Random = UnityEngine.Random;
 public class Weapons : MonoBehaviour
 {
     public float fireRate;
-    public float damage;
+    public int damage;
+    public float effectSpawnRate;
     public LayerMask whatToHit;
     public Transform bulletTrailPrefab;
-    public float effectSpawnRate;
     public Transform muzzleFlashPrefab;
+    public Transform hitPrefab;
 
+    // Camera Shake Section
+    CameraShaker camShaker;
+    public float camShakeAmount;
+    private float camShakeLength = 0.1f;
 
     private float timeToFire = 0;
     private float timeToSpawnEffect = 0;
     private Transform firePoint;
+    private const int raycastDistance = 100;
     void Awake()
     {
         firePoint = transform.Find("FirePoint");
         Debug.Assert(firePoint != null);
+
+    }
+
+    private void Start()
+    {
+        camShaker = GameMaster.gm.GetComponent<CameraShaker>();
+        Debug.Assert(camShaker != null);
     }
 
     void Update()
@@ -52,26 +65,63 @@ public class Weapons : MonoBehaviour
             );
             Vector2 firePointPosition = new Vector2(firePoint.position.x, firePoint.position.y);
 
-            RaycastHit2D hit = Physics2D.Raycast(firePointPosition, mousePosition - firePointPosition, 100, whatToHit);
-            showEffect();
-            timeToSpawnEffect = Time.time + 1 / effectSpawnRate;
+            RaycastHit2D hit = Physics2D.Raycast(firePointPosition, mousePosition - firePointPosition, raycastDistance, whatToHit);
+ 
             if (hit.collider != null)
             {
                 Debug.DrawLine(firePointPosition, hit.point, Color.red, 0.5f);
-                Debug.Log($"We Hit {hit.collider.name}");
+                
+                Enemy enemy = hit.collider.GetComponent<Enemy>();
+                if (enemy != null)
+                {
+                    enemy.DamageEnemy(damage);
+                    Debug.Log($"We Hit {hit.collider.name} It Damaged {damage}");
+                }
             }
+            Vector3 hitPosition;
+            Vector3 hitNormal;
+            bool isHit = false;
+            if (hit.collider == null)
+            {
+                hitPosition = (mousePosition - firePointPosition) * 30;
+                hitNormal = Vector3.zero;
+            }
+            else
+            {
+                hitPosition = hit.point;
+                hitNormal = hit.normal;
+                isHit = true;
+            }
+
+            showEffect(hitPosition, hitNormal, isHit);
+            timeToSpawnEffect = Time.time + 1 / effectSpawnRate;
         }
         
         //Debug.DrawLine(firePointPosition, (mousePosition-firePointPosition) * 10, Color.yellow, 0.2f);
         
     }
 
-    private void showEffect()
+    private void showEffect(Vector3 hitPosition, Vector3 hitNormal, bool isHit)
     {
-        Instantiate(bulletTrailPrefab, firePoint.position, firePoint.rotation);
-        
+        // Bullet Trail Section
+        Transform bulletTrail = Instantiate(bulletTrailPrefab, firePoint.position, firePoint.rotation) as Transform;
+        LineRenderer lineRenderer = bulletTrail.GetComponent<LineRenderer>();
+        Debug.Assert(lineRenderer != null);
+        lineRenderer.SetPosition(0, firePoint.position);
+        lineRenderer.SetPosition(1, hitPosition);
+
+        Destroy(bulletTrail.gameObject, 0.4f);
+
+        if (isHit)
+        {
+            Transform hitEffect = Instantiate(hitPrefab, hitPosition, Quaternion.FromToRotation(Vector3.right, hitNormal)) as Transform;
+            Destroy(hitEffect.gameObject, 0.4f);
+            camShaker.Shake(camShakeAmount, camShakeLength);
+        }
+
 
         // TODO : 나중에 여기 그냥 이미지 껏다켰다로 바꾸는 걸로 구현해보자. 이건 무슨 낭비냐.
+        // MuzzleFlash Section
         Transform muzzleInstance = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation) as Transform;
         muzzleInstance.parent = firePoint;
         float size = Random.Range(0.6f, 0.9f);
